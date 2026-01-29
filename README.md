@@ -35,7 +35,7 @@ A modern, feature-rich authentication system built with React, Vite, Express, an
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
-- **Node.js** (v14 or higher)
+- **Node.js** (v18 or higher recommended)
 - **npm** or **yarn**
 - A modern web browser that supports WebAuthn (Chrome, Firefox, Safari, Edge)
 
@@ -79,7 +79,14 @@ Before you begin, ensure you have the following installed:
    };
    ```
 
-   ⚠️ **Security Note**: For production, use environment variables to store sensitive configuration.
+   ⚠️ **Security Note**: For production, use environment variables to store sensitive configuration:
+   ```typescript
+   const firebaseConfig = {
+     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+     // ... other config
+   };
+   ```
 
 ### WebAuthn Configuration
 
@@ -91,6 +98,10 @@ The WebAuthn server is pre-configured to work with `localhost:5173`. If you need
    const rpID = 'localhost';
    const origin = `http://${rpID}:5173`;
    ```
+
+⚠️ **Important**: The server currently uses in-memory storage (Map) for WebAuthn credentials. This means:
+- All registered biometric credentials will be lost when the server restarts
+- Not suitable for production use without implementing persistent database storage
 
 ## 🏃 Running the Application
 
@@ -123,7 +134,7 @@ http://localhost:5173
 
 ```
 new-login-with-nextjs/
-├── src/
+├── src/                         # Main React application (Vite-based)
 │   ├── components/
 │   │   ├── AuthForm.tsx         # Main authentication form
 │   │   ├── EmailForm.tsx        # Email/password form
@@ -137,13 +148,16 @@ new-login-with-nextjs/
 ├── server/
 │   └── index.js                 # Express server for WebAuthn
 ├── components/
-│   └── ui/                      # Reusable UI components
-├── public/                      # Static assets
+│   └── ui/                      # Reusable shadcn/ui components
+├── app/                         # Next.js app directory (alternative setup)
+├── hooks/                       # Custom React hooks
 ├── package.json                 # Dependencies and scripts
 ├── vite.config.ts              # Vite configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
+├── tailwind.config.js          # Tailwind CSS configuration
 └── tsconfig.json               # TypeScript configuration
 ```
+
+**Note**: This repository contains both Vite and Next.js configurations. The main documented setup uses Vite (via `npm run dev`). The Next.js files in the `app/` directory provide an alternative setup option.
 
 ## 🔑 Using Biometric Authentication
 
@@ -181,8 +195,10 @@ new-login-with-nextjs/
    - Use `.env` files with proper `.gitignore` settings
 
 2. **Database**
-   - Replace in-memory storage with a proper database (PostgreSQL, MongoDB)
+   - Replace in-memory storage (Map) with a proper database (PostgreSQL, MongoDB)
+   - **Critical**: Current server uses in-memory storage that resets on restart
    - Implement proper user management and session handling
+   - Store WebAuthn credentials persistently
 
 3. **HTTPS**
    - Use HTTPS in production for WebAuthn to work properly
